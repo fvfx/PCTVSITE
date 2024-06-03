@@ -74,7 +74,7 @@
     "type": "image",
     "duration": 5,
     "categoria": "Sequencial",
-    "repeatCount": 2,
+    "repeatCount": 1,
     "excludedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
@@ -94,7 +94,7 @@
     "type": "image",
     "duration": 5,
     "categoria": "Intercalada",
-    "repeatCount": 2,
+    "repeatCount": 1,
     "excludedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
