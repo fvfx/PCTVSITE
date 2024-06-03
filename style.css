@@ -1,19 +1,32 @@
-﻿#media-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
+﻿body {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
 }
 
-#media-container img, #media-container video {
+#content {
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+img, video {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
 #system-name {
     position: absolute;
-    top: 10px;
+    bottom: 10px;
     right: 10px;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
 }

@@ -1,125 +1,147 @@
-﻿const mediaContainer = document.getElementById('media-container');
-const systemNameDiv = document.getElementById('system-name');
+﻿document.addEventListener("DOMContentLoaded", function() {
+    let currentIndex = 0;
+    let currentRepeatCounts = {};
+    let mediaData = [];
+    let contentElement = document.getElementById('content');
+    let systemNameElement = document.getElementById('system-name');
+    let normalMedia = [];
+    let sequencialMedia = [];
+    let intercaladaMedia = [];
+    let sequencialIndex = 0;
+    let intercaladaIndex = 0;
 
-let currentMediaIndex = 0;
-let programming = [];
-let lastFetchTime = 0;
-let sequentialQueue = [];
-let intercalatedQueue = [];
-
-// Função para buscar a programação do JSON
-async function fetchProgramming() {
-    const response = await fetch('programacao.json');
-    const data = await response.json();
-    return data;
-}
-
-// Função para verificar se um arquivo deve ser exibido com base nas datas
-function shouldDisplay(media) {
-    const now = new Date();
-    const dataDeInicio = media.dataDeInicio ? new Date(media.dataDeInicio) : null;
-    const dataDeExclusao = media.dataDeExclusao ? new Date(media.dataDeExclusao) : null;
-
-    return (!dataDeInicio || now >= dataDeInicio) && (!dataDeExclusao || now <= dataDeExclusao);
-}
-
-// Função para limpar o container e exibir a mídia selecionada
-function displayMedia(media) {
-    mediaContainer.innerHTML = '';
-    const mediaElement = media.type === 'image' ? document.createElement('img') : document.createElement('video');
-    mediaElement.src = media.path;
-
-    if (media.type === 'video') {
-        mediaElement.autoplay = true;
-        mediaElement.controls = false;
-
-        mediaElement.addEventListener('loadeddata', () => {
-            if (mediaElement.requestFullscreen) {
-                mediaElement.requestFullscreen();
-            } else if (mediaElement.webkitRequestFullscreen) {
-                mediaElement.webkitRequestFullscreen();
-            } else if (mediaElement.msRequestFullscreen) {
-                mediaElement.msRequestFullscreen();
-            }
-        });
+    async function fetchJSON() {
+        try {
+            const response = await fetch('programacao.json');
+            return await response.json();
+        } catch (error) {
+            console.error("Erro ao carregar o JSON:", error);
+            return [];
+        }
     }
 
-    mediaContainer.appendChild(mediaElement);
-}
-
-// Função principal para carregar e exibir a mídia
-async function loadMedia() {
-    const filteredProgramming = programming.filter(media => shouldDisplay(media) && !media.excludedTVs.includes(systemNameDiv.textContent));
-
-    let nextMedia = null;
-    if (sequentialQueue.length > 0) {
-        nextMedia = sequentialQueue.shift();
-    } else if (intercalatedQueue.length > 0) {
-        nextMedia = intercalatedQueue.shift();
-    } else {
-        nextMedia = filteredProgramming[currentMediaIndex];
-        currentMediaIndex = (currentMediaIndex + 1) % filteredProgramming.length;
-        
-        // Adicionar próximos itens sequenciais e intercalados às filas
-        filteredProgramming.forEach((media, index) => {
-            if (index >= currentMediaIndex) {
-                if (media.categoria === 'Sequencial' && shouldDisplay(media)) {
-                    sequentialQueue.push(media);
-                } else if (media.categoria === 'Intercalada' && shouldDisplay(media)) {
-                    if (!intercalatedQueue[media.repeatCount]) {
-                        intercalatedQueue[media.repeatCount] = [];
-                    }
-                    intercalatedQueue[media.repeatCount].push(media);
-                }
-            }
-        });
+    async function loadMediaData() {
+        mediaData = await fetchJSON();
+        currentIndex = 0;
+        sequencialIndex = 0;
+        intercaladaIndex = 0;
+        currentRepeatCounts = {};
+        categorizeMedia();
+        displayNextMedia();
     }
 
-    if (nextMedia) {
-        displayMedia(nextMedia);
-        setTimeout(loadMedia, nextMedia.duration * 1000);
+    function categorizeMedia() {
+        normalMedia = mediaData.filter(media => media.categoria === "Normal");
+        sequencialMedia = mediaData.filter(media => media.categoria === "Sequencial");
+        intercaladaMedia = mediaData.filter(media => media.categoria === "Intercalada");
     }
-}
 
-// Função para verificar se houve alterações na programação
-async function updateProgramming() {
-    const currentTime = Date.now();
-    if (currentTime - lastFetchTime >= 60000) {
-        const newProgramming = await fetchProgramming();
-
-        if (JSON.stringify(newProgramming) !== JSON.stringify(programming)) {
-            programming = newProgramming;
-            currentMediaIndex = 0;
-            sequentialQueue = [];
-            intercalatedQueue = [];
-            loadMedia();
+    function displayNextMedia() {
+        if (currentIndex >= normalMedia.length) {
+            currentIndex = 0;
         }
 
-        lastFetchTime = currentTime;
+        const media = normalMedia[currentIndex];
+
+        contentElement.innerHTML = '';
+        displayMedia(media);
+
+        let sequencialItem = getNextSequencialMedia();
+        if (sequencialItem) {
+            setTimeout(() => displayMedia(sequencialItem), media.duration * 1000);
+            setTimeout(displayNextMedia, (media.duration + sequencialItem.duration) * 1000);
+        } else {
+            setTimeout(displayNextMedia, media.duration * 1000);
+        }
+
+        let intercaladaItem = getNextIntercaladaMedia();
+        if (intercaladaItem) {
+            setTimeout(() => displayMedia(intercaladaItem), media.duration * 1000);
+            setTimeout(displayNextMedia, (media.duration + intercaladaItem.duration) * 1000);
+        } else {
+            setTimeout(displayNextMedia, media.duration * 1000);
+        }
+
+        currentIndex++;
     }
-}
 
-// Função para obter o nome do sistema
-function getSystemName() {
-    return "NomeDoSistema";
-}
+    function displayMedia(media) {
+        let mediaElement;
+        if (media.type === 'image') {
+            mediaElement = document.createElement('img');
+            mediaElement.src = media.path;
+        } else if (media.type === 'video') {
+            mediaElement = document.createElement('video');
+            mediaElement.src = media.path;
+            mediaElement.autoplay = true;
+            mediaElement.muted = true;
+            mediaElement.onended = () => { displayNextMedia(); };
+        }
 
-// Função para verificar e limpar o cache
-function checkAndClearCache() {
-    if (window.caches) {
-        caches.keys().then(names => {
-            for (let name of names) caches.delete(name);
-        });
+        if (mediaElement) {
+            contentElement.appendChild(mediaElement);
+        }
     }
-}
 
-// Inicialização da página
-async function init() {
-    systemNameDiv.textContent = getSystemName();
-    programming = await fetchProgramming();
-    loadMedia();
-    setInterval(updateProgramming, 60000);
-    setInterval(checkAndClearCache, 300000);
-}
+    function getNextSequencialMedia() {
+        while (sequencialIndex < sequencialMedia.length) {
+            const media = sequencialMedia[sequencialIndex];
+            const repeatCount = media.repeatCount || 1;
+            currentRepeatCounts['Sequencial'] = (currentRepeatCounts['Sequencial'] || 0) + 1;
+            if (currentRepeatCounts['Sequencial'] % repeatCount === 0) {
+                sequencialIndex++;
+                return media;
+            }
+            sequencialIndex++;
+        }
+        sequencialIndex = 0;
+        return null;
+    }
 
-init();
+    function getNextIntercaladaMedia() {
+        while (intercaladaIndex < intercaladaMedia.length) {
+            const media = intercaladaMedia[intercaladaIndex];
+            const repeatCount = media.repeatCount || 1;
+            currentRepeatCounts['Intercalada'] = (currentRepeatCounts['Intercalada'] || 0) + 1;
+            if (currentRepeatCounts['Intercalada'] % repeatCount === 0) {
+                intercaladaIndex++;
+                return media;
+            }
+            intercaladaIndex++;
+        }
+        intercaladaIndex = 0;
+        return null;
+    }
+
+    function isValidMedia(media) {
+        const now = new Date();
+        const startDate = media.dataDeInicio ? new Date(media.dataDeInicio) : null;
+        const endDate = media.dataDeExclusao ? new Date(media.dataDeExclusao) : null;
+
+        if (startDate && now < startDate) {
+            return false;
+        }
+        if (endDate && now > endDate) {
+            return false;
+        }
+
+        const systemName = getSystemName();
+        if (media.excludedTVs.includes(systemName)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function getSystemName() {
+        return navigator.userAgent;
+    }
+
+    function updateSystemName() {
+        systemNameElement.textContent = getSystemName();
+    }
+
+    setInterval(loadMediaData, 60000);  // Verifica mudanças no JSON a cada 60 segundos
+    loadMediaData();  // Carrega a programação inicial
+    updateSystemName();
+});
