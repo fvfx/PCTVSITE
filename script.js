@@ -33,7 +33,6 @@ function displayMedia(media) {
         mediaElement.autoplay = true;
         mediaElement.controls = false;
 
-        // Lógica para tela cheia
         mediaElement.addEventListener('loadeddata', () => {
             if (mediaElement.requestFullscreen) {
                 mediaElement.requestFullscreen();
@@ -63,10 +62,15 @@ async function loadMedia() {
         
         // Adicionar próximos itens sequenciais e intercalados às filas
         filteredProgramming.forEach((media, index) => {
-            if (media.categoria === 'Sequencial' && index > currentMediaIndex && shouldDisplay(media)) {
-                sequentialQueue.push(media);
-            } else if (media.categoria === 'Intercalada' && index > currentMediaIndex && shouldDisplay(media)) {
-                intercalatedQueue.push(media);
+            if (index >= currentMediaIndex) {
+                if (media.categoria === 'Sequencial' && shouldDisplay(media)) {
+                    sequentialQueue.push(media);
+                } else if (media.categoria === 'Intercalada' && shouldDisplay(media)) {
+                    if (!intercalatedQueue[media.repeatCount]) {
+                        intercalatedQueue[media.repeatCount] = [];
+                    }
+                    intercalatedQueue[media.repeatCount].push(media);
+                }
             }
         });
     }
