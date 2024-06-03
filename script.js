@@ -1,6 +1,5 @@
 ﻿document.addEventListener("DOMContentLoaded", function() {
     let currentIndex = 0;
-    let currentRepeatCounts = {};
     let mediaData = [];
     let contentElement = document.getElementById('content');
     let systemNameElement = document.getElementById('system-name');
@@ -62,7 +61,7 @@
         let sequencialItem = getNextSequencialMedia();
         let intercaladaItem = getNextIntercaladaMedia();
 
-        if (sequencialItem) {
+        if (sequencialItem && sequencialItem.repeatCount <= intercaladaItem.repeatCount) {
             currentNormalIndex++;
             return sequencialItem;
         }
@@ -89,6 +88,9 @@
         }
 
         if (mediaElement) {
+            // Set width and height to maintain 16:9 aspect ratio
+            mediaElement.style.width = '100%';
+            mediaElement.style.height = 'auto';
             contentElement.appendChild(mediaElement);
         }
     }
