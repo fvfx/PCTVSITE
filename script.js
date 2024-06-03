@@ -46,7 +46,10 @@ async function loadMedia() {
 
     if (nextMedia) {
         const mediaElement = nextMedia.type === 'image' ? new Image() : document.createElement('video');
-        mediaElement.src = encodeURI(nextMedia.path); // Corrige a codificação da URL
+
+        // Corrigir a codificação da URL da imagem ANTES de atribuir ao src
+        const encodedPath = nextMedia.path.replace(/[^a-zA-Z0-9-_.~!*'();:@&=+$,/?#[\]]/g, encodeURIComponent); 
+        mediaElement.src = encodedPath;
 
         if (nextMedia.type === 'video') {
             mediaElement.autoplay = true;
