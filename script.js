@@ -9,9 +9,17 @@ let intercalatedQueue = [];
 
 // Função para buscar a programação do JSON
 async function fetchProgramming() {
-    const response = await fetch("programacao.json");
-    const data = await response.json();
-    return data;
+    try {
+        const response = await fetch("programacao.json");
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar programação: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Erro ao buscar programação:", error);
+        return []; // Retornar um array vazio em caso de erro
+    }
 }
 
 // Função para verificar se um arquivo deve ser exibido com base nas datas
@@ -38,7 +46,7 @@ async function loadMedia() {
     } else if (intercalatedQueue.length > 0) {
         nextMedia = intercalatedQueue.shift();
         mediaCategory = "Intercalada";
-    } else {
+    } else if (currentMediaIndex < filteredProgramming.length) { // Verificar se ainda há mídias "Normal"
         nextMedia = filteredProgramming[currentMediaIndex];
         mediaCategory = "Normal";
         currentMediaIndex = (currentMediaIndex + 1) % filteredProgramming.length;
@@ -50,6 +58,8 @@ async function loadMedia() {
         // Corrigir a codificação da URL da imagem ANTES de atribuir ao src
         const encodedPath = nextMedia.path.replace(/[^a-zA-Z0-9-_.~!*'();:@&=+$,/?#[\]]/g, encodeURIComponent); 
         mediaElement.src = encodedPath;
+        mediaElement.style.maxWidth = "100%"; //Garantir responsividade
+        mediaElement.style.maxHeight = "100%";
 
         if (nextMedia.type === 'video') {
             mediaElement.autoplay = true;
@@ -59,13 +69,7 @@ async function loadMedia() {
         mediaElement.onload = () => {
             mediaContainer.innerHTML = ''; // Limpar o container
             mediaContainer.appendChild(mediaElement);
-
-            // Agendar a próxima exibição, levando em conta o tipo de mídia
-            let nextMediaIndex = currentMediaIndex; // Valor padrão para Normal e Intercalada
-            if (mediaCategory === "Sequencial") {
-                nextMediaIndex = nextMedia.repeatCount; // Sequencial repete após um número específico de mídias Normais
-            }
-            setTimeout(loadMedia, nextMedia.duration * 1000, nextMediaIndex);
+            setTimeout(loadMedia, nextMedia.duration * 1000);
         };
 
         mediaElement.onerror = () => {
@@ -73,7 +77,7 @@ async function loadMedia() {
             loadMedia(); // Pular para a próxima mídia se houver erro
         };
     } else {
-        currentMediaIndex = 0; 
+        currentMediaIndex = 0; // Reiniciar o índice para a próxima iteração
         loadMedia(); // Reiniciar a programação se não houver mais mídias
     }
 
