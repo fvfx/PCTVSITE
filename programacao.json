@@ -60,11 +60,41 @@
     "dataDeInicio": null
   },
   {
-    "path": "https://fvfx.github.io/vxtest/03 Coleção Dia dos Namorados - PCTV Horizontal.jpg",
+    "path": "https://fvfx.github.io/vxtest/SEQUENCIAL_01.jpg",
     "type": "image",
     "duration": 5,
     "categoria": "Sequencial",
-    "repeatCount": 1, 
+    "repeatCount": 1,
+    "excludedTVs": [],
+    "dataDeExclusao": null,
+    "dataDeInicio": null
+  },
+  {
+    "path": "https://fvfx.github.io/vxtest/SEQUENCIAL_02.jpg",
+    "type": "image",
+    "duration": 5,
+    "categoria": "Sequencial",
+    "repeatCount": 2,
+    "excludedTVs": [],
+    "dataDeExclusao": null,
+    "dataDeInicio": null
+  },
+  {
+    "path": "https://fvfx.github.io/vxtest/Intercalada_01.jpg",
+    "type": "image",
+    "duration": 5,
+    "categoria": "Intercalada",
+    "repeatCount": 1,
+    "excludedTVs": [],
+    "dataDeExclusao": null,
+    "dataDeInicio": null
+  },
+  {
+    "path": "https://fvfx.github.io/vxtest/Intercalada_02.jpg",
+    "type": "image",
+    "duration": 5,
+    "categoria": "Intercalada",
+    "repeatCount": 2,
     "excludedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
