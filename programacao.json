@@ -49,16 +49,7 @@
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
-  {
-    "path": "https://fvfx.github.io/vxtest/01 Coleção Dia dos Namorados - PCTV Horizontal.jpg",
-    "type": "image",
-    "duration": 5,
-    "categoria": "Sequencial",
-    "repeatCount": 1, 
-    "excludedTVs": [],
-    "dataDeExclusao": null,
-    "dataDeInicio": null
-  },
+  
   {
     "path": "https://fvfx.github.io/vxtest/SEQUENCIAL_01.jpg",
     "type": "image",
