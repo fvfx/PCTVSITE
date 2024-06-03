@@ -29,6 +29,10 @@
         currentNormalIndex = 0;
         sequencialIndex = 0;
         intercaladaIndex = 0;
+        repeatCounters = {
+            sequencial: 0,
+            intercalada: 0
+        };
         displayNextMedia();
     }
 
@@ -54,21 +58,34 @@
         }
 
         let media = normalMedia[currentNormalIndex];
-        let sequencialItem = getNextSequencialMedia();
-        let intercaladaItem = getNextIntercaladaMedia();
 
-        if (sequencialItem && repeatCounters.sequencial % sequencialItem.repeatCount === 0) {
-            repeatCounters.sequencial++;
-            return sequencialItem;
+        // Verifica se há uma mídia sequencial a ser exibida
+        if (repeatCounters.sequencial % getRepeatCount(sequencialMedia) === 0 && sequencialMedia.length > 0) {
+            let sequencialItem = getNextSequencialMedia();
+            if (sequencialItem) {
+                repeatCounters.sequencial++;
+                return sequencialItem;
+            }
         }
 
-        if (intercaladaItem && repeatCounters.intercalada % intercaladaItem.repeatCount === 0) {
-            repeatCounters.intercalada++;
-            return intercaladaItem;
+        // Verifica se há uma mídia intercalada a ser exibida
+        if (repeatCounters.intercalada % getRepeatCount(intercaladaMedia) === 0 && intercaladaMedia.length > 0) {
+            let intercaladaItem = getNextIntercaladaMedia();
+            if (intercaladaItem) {
+                repeatCounters.intercalada++;
+                return intercaladaItem;
+            }
         }
 
+        repeatCounters.sequencial++;
+        repeatCounters.intercalada++;
         currentNormalIndex++;
         return media;
+    }
+
+    function getRepeatCount(mediaArray) {
+        if (mediaArray.length === 0) return 1;
+        return mediaArray[0].repeatCount || 1;
     }
 
     function displayMedia(media) {
@@ -89,33 +106,27 @@
     }
 
     function getNextSequencialMedia() {
-        if (sequencialIndex >= sequencialMedia.length) {
-            sequencialIndex = 0;
-        }
-
-        let media = sequencialMedia[sequencialIndex];
-        if (isValidMedia(media)) {
+        while (sequencialIndex < sequencialMedia.length) {
+            let media = sequencialMedia[sequencialIndex];
             sequencialIndex++;
-            return media;
+            if (isValidMedia(media)) {
+                return media;
+            }
         }
-
-        sequencialIndex++;
-        return getNextSequencialMedia();
+        sequencialIndex = 0;
+        return null;
     }
 
     function getNextIntercaladaMedia() {
-        if (intercaladaIndex >= intercaladaMedia.length) {
-            intercaladaIndex = 0;
-        }
-
-        let media = intercaladaMedia[intercaladaIndex];
-        if (isValidMedia(media)) {
+        while (intercaladaIndex < intercaladaMedia.length) {
+            let media = intercaladaMedia[intercaladaIndex];
             intercaladaIndex++;
-            return media;
+            if (isValidMedia(media)) {
+                return media;
+            }
         }
-
-        intercaladaIndex++;
-        return getNextIntercaladaMedia();
+        intercaladaIndex = 0;
+        return null;
     }
 
     function isValidMedia(media) {
