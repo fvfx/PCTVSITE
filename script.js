@@ -40,16 +40,15 @@ async function loadMedia() {
     let nextMedia = null;
     let mediaCategory = null;
 
-    if (sequentialQueue.length > 0) {
+    if (sequentialQueue.length > 0 && sequentialQueue[0].repeatCount === currentMediaIndex) {
         nextMedia = sequentialQueue.shift();
         mediaCategory = "Sequencial";
-    } else if (intercalatedQueue.length > 0) {
+    } else if (intercalatedQueue.length > 0 && intercalatedQueue[0].repeatCount === currentMediaIndex) {
         nextMedia = intercalatedQueue.shift();
         mediaCategory = "Intercalada";
     } else if (currentMediaIndex < filteredProgramming.length) { // Verificar se ainda há mídias "Normal"
         nextMedia = filteredProgramming[currentMediaIndex];
         mediaCategory = "Normal";
-        currentMediaIndex = (currentMediaIndex + 1) % filteredProgramming.length;
     }
 
     if (nextMedia) {
@@ -69,7 +68,15 @@ async function loadMedia() {
         mediaElement.onload = () => {
             mediaContainer.innerHTML = ''; // Limpar o container
             mediaContainer.appendChild(mediaElement);
-            setTimeout(loadMedia, nextMedia.duration * 1000);
+
+            // Agendar a próxima exibição, levando em conta o tipo de mídia
+            if (mediaCategory === "Sequencial" || mediaCategory === "Intercalada") {
+                // Não incrementa o índice para Sequencial e Intercalada
+                setTimeout(loadMedia, nextMedia.duration * 1000);
+            } else {
+                currentMediaIndex = (currentMediaIndex + 1) % filteredProgramming.length;
+                setTimeout(loadMedia, nextMedia.duration * 1000);
+            }
         };
 
         mediaElement.onerror = () => {
@@ -95,7 +102,18 @@ async function loadMedia() {
 
 // Função para verificar se houve alterações na programação (sem alterações)
 async function updateProgramming() {
-    // ... (mesma lógica de antes)
+    const currentTime = Date.now();
+    if (currentTime - lastFetchTime >= 60000) { // 60 segundos
+        const newProgramming = await fetchProgramming();
+        if (JSON.stringify(newProgramming) !== JSON.stringify(programming)) {
+            programming = newProgramming;
+            currentMediaIndex = 0;
+            sequentialQueue = [];
+            intercalatedQueue = [];
+            loadMedia(); // Recarregar a programação imediatamente
+        }
+        lastFetchTime = currentTime;
+    }
 }
 
 // Função para obter o nome do sistema (implementação específica para seu ambiente)
