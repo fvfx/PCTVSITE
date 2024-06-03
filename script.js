@@ -1,5 +1,4 @@
 ﻿document.addEventListener("DOMContentLoaded", function() {
-    let currentIndex = 0;
     let mediaData = [];
     let contentElement = document.getElementById('content');
     let systemNameElement = document.getElementById('system-name');
@@ -7,8 +6,12 @@
     let sequencialMedia = [];
     let intercaladaMedia = [];
     let currentNormalIndex = 0;
-    let sequencialCounters = {};
-    let intercaladaCounters = {};
+    let sequencialIndex = 0;
+    let intercaladaIndex = 0;
+    let repeatCounters = {
+        sequencial: 0,
+        intercalada: 0
+    };
 
     async function fetchJSON() {
         try {
@@ -24,8 +27,8 @@
         mediaData = await fetchJSON();
         categorizeMedia();
         currentNormalIndex = 0;
-        sequencialCounters = {};
-        intercaladaCounters = {};
+        sequencialIndex = 0;
+        intercaladaIndex = 0;
         displayNextMedia();
     }
 
@@ -46,28 +49,21 @@
     }
 
     function getNextMedia() {
-        let media = normalMedia[currentNormalIndex];
-
-        if (!media) {
+        if (currentNormalIndex >= normalMedia.length) {
             currentNormalIndex = 0;
-            media = normalMedia[currentNormalIndex];
         }
 
-        if (!isValidMedia(media)) {
-            currentNormalIndex++;
-            return getNextMedia();
-        }
-
+        let media = normalMedia[currentNormalIndex];
         let sequencialItem = getNextSequencialMedia();
         let intercaladaItem = getNextIntercaladaMedia();
 
-        if (sequencialItem && sequencialItem.repeatCount <= intercaladaItem.repeatCount) {
-            currentNormalIndex++;
+        if (sequencialItem && repeatCounters.sequencial % sequencialItem.repeatCount === 0) {
+            repeatCounters.sequencial++;
             return sequencialItem;
         }
 
-        if (intercaladaItem) {
-            currentNormalIndex++;
+        if (intercaladaItem && repeatCounters.intercalada % intercaladaItem.repeatCount === 0) {
+            repeatCounters.intercalada++;
             return intercaladaItem;
         }
 
@@ -88,37 +84,38 @@
         }
 
         if (mediaElement) {
-            // Set width and height to maintain 16:9 aspect ratio
-            mediaElement.style.width = '100%';
-            mediaElement.style.height = 'auto';
             contentElement.appendChild(mediaElement);
         }
     }
 
     function getNextSequencialMedia() {
-        for (let media of sequencialMedia) {
-            if (isValidMedia(media)) {
-                const repeatCount = media.repeatCount || 1;
-                sequencialCounters[media.path] = (sequencialCounters[media.path] || 0) + 1;
-                if (sequencialCounters[media.path] % repeatCount === 0) {
-                    return media;
-                }
-            }
+        if (sequencialIndex >= sequencialMedia.length) {
+            sequencialIndex = 0;
         }
-        return null;
+
+        let media = sequencialMedia[sequencialIndex];
+        if (isValidMedia(media)) {
+            sequencialIndex++;
+            return media;
+        }
+
+        sequencialIndex++;
+        return getNextSequencialMedia();
     }
 
     function getNextIntercaladaMedia() {
-        for (let media of intercaladaMedia) {
-            if (isValidMedia(media)) {
-                const repeatCount = media.repeatCount || 1;
-                intercaladaCounters[media.path] = (intercaladaCounters[media.path] || 0) + 1;
-                if (intercaladaCounters[media.path] % repeatCount === 0) {
-                    return media;
-                }
-            }
+        if (intercaladaIndex >= intercaladaMedia.length) {
+            intercaladaIndex = 0;
         }
-        return null;
+
+        let media = intercaladaMedia[intercaladaIndex];
+        if (isValidMedia(media)) {
+            intercaladaIndex++;
+            return media;
+        }
+
+        intercaladaIndex++;
+        return getNextIntercaladaMedia();
     }
 
     function isValidMedia(media) {
