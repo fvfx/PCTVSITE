@@ -7,8 +7,9 @@
     let normalMedia = [];
     let sequencialMedia = [];
     let intercaladaMedia = [];
-    let sequencialIndex = 0;
-    let intercaladaIndex = 0;
+    let currentNormalIndex = 0;
+    let sequencialCounters = {};
+    let intercaladaCounters = {};
 
     async function fetchJSON() {
         try {
@@ -22,11 +23,10 @@
 
     async function loadMediaData() {
         mediaData = await fetchJSON();
-        currentIndex = 0;
-        sequencialIndex = 0;
-        intercaladaIndex = 0;
-        currentRepeatCounts = {};
         categorizeMedia();
+        currentNormalIndex = 0;
+        sequencialCounters = {};
+        intercaladaCounters = {};
         displayNextMedia();
     }
 
@@ -37,32 +37,43 @@
     }
 
     function displayNextMedia() {
-        if (currentIndex >= normalMedia.length) {
-            currentIndex = 0;
+        contentElement.innerHTML = '';
+        let media = getNextMedia();
+
+        if (media) {
+            displayMedia(media);
+            setTimeout(displayNextMedia, media.duration * 1000);
+        }
+    }
+
+    function getNextMedia() {
+        let media = normalMedia[currentNormalIndex];
+
+        if (!media) {
+            currentNormalIndex = 0;
+            media = normalMedia[currentNormalIndex];
         }
 
-        const media = normalMedia[currentIndex];
-
-        contentElement.innerHTML = '';
-        displayMedia(media);
+        if (!isValidMedia(media)) {
+            currentNormalIndex++;
+            return getNextMedia();
+        }
 
         let sequencialItem = getNextSequencialMedia();
-        if (sequencialItem) {
-            setTimeout(() => displayMedia(sequencialItem), media.duration * 1000);
-            setTimeout(displayNextMedia, (media.duration + sequencialItem.duration) * 1000);
-        } else {
-            setTimeout(displayNextMedia, media.duration * 1000);
-        }
-
         let intercaladaItem = getNextIntercaladaMedia();
-        if (intercaladaItem) {
-            setTimeout(() => displayMedia(intercaladaItem), media.duration * 1000);
-            setTimeout(displayNextMedia, (media.duration + intercaladaItem.duration) * 1000);
-        } else {
-            setTimeout(displayNextMedia, media.duration * 1000);
+
+        if (sequencialItem) {
+            currentNormalIndex++;
+            return sequencialItem;
         }
 
-        currentIndex++;
+        if (intercaladaItem) {
+            currentNormalIndex++;
+            return intercaladaItem;
+        }
+
+        currentNormalIndex++;
+        return media;
     }
 
     function displayMedia(media) {
@@ -75,7 +86,6 @@
             mediaElement.src = media.path;
             mediaElement.autoplay = true;
             mediaElement.muted = true;
-            mediaElement.onended = () => { displayNextMedia(); };
         }
 
         if (mediaElement) {
@@ -84,32 +94,28 @@
     }
 
     function getNextSequencialMedia() {
-        while (sequencialIndex < sequencialMedia.length) {
-            const media = sequencialMedia[sequencialIndex];
-            const repeatCount = media.repeatCount || 1;
-            currentRepeatCounts['Sequencial'] = (currentRepeatCounts['Sequencial'] || 0) + 1;
-            if (currentRepeatCounts['Sequencial'] % repeatCount === 0) {
-                sequencialIndex++;
-                return media;
+        for (let media of sequencialMedia) {
+            if (isValidMedia(media)) {
+                const repeatCount = media.repeatCount || 1;
+                sequencialCounters[media.path] = (sequencialCounters[media.path] || 0) + 1;
+                if (sequencialCounters[media.path] % repeatCount === 0) {
+                    return media;
+                }
             }
-            sequencialIndex++;
         }
-        sequencialIndex = 0;
         return null;
     }
 
     function getNextIntercaladaMedia() {
-        while (intercaladaIndex < intercaladaMedia.length) {
-            const media = intercaladaMedia[intercaladaIndex];
-            const repeatCount = media.repeatCount || 1;
-            currentRepeatCounts['Intercalada'] = (currentRepeatCounts['Intercalada'] || 0) + 1;
-            if (currentRepeatCounts['Intercalada'] % repeatCount === 0) {
-                intercaladaIndex++;
-                return media;
+        for (let media of intercaladaMedia) {
+            if (isValidMedia(media)) {
+                const repeatCount = media.repeatCount || 1;
+                intercaladaCounters[media.path] = (intercaladaCounters[media.path] || 0) + 1;
+                if (intercaladaCounters[media.path] % repeatCount === 0) {
+                    return media;
+                }
             }
-            intercaladaIndex++;
         }
-        intercaladaIndex = 0;
         return null;
     }
 
