@@ -98,8 +98,8 @@ function extractVimeoId(url) {
 function organizeMediaData(data) {
     const now = new Date();
     normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item, now));
-    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item, now));
-    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item, now));
+    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item, now) && item.repeatCount && item.repeatCount > 0);
+    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item, now) && item.repeatCount && item.repeatCount > 0);
     sequentialCounts = {};
     intercalatedCounts = {};
 
