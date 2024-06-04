@@ -1,4 +1,4 @@
-﻿<<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,5 +10,27 @@
     <div id="media-container"></div>
     <div id="device-name" style="position: fixed; bottom: 0; left: 0; color: white; background-color: black; padding: 5px;"></div>
     <script src="script.js"></script>
+    <script>
+        // Hide cursor after a period of inactivity
+        let cursorTimeout;
+        const hideCursorDelay = 3000; // 3 seconds of inactivity
+
+        function hideCursor() {
+            document.body.style.cursor = 'none';
+        }
+
+        function resetCursorTimer() {
+            document.body.style.cursor = 'default';
+            clearTimeout(cursorTimeout);
+            cursorTimeout = setTimeout(hideCursor, hideCursorDelay);
+        }
+
+        document.addEventListener('mousemove', resetCursorTimer);
+        document.addEventListener('mousedown', resetCursorTimer);
+        document.addEventListener('keydown', resetCursorTimer);
+        document.addEventListener('touchstart', resetCursorTimer);
+
+        resetCursorTimer(); // Initial call to set the timeout
+    </script>
 </body>
 </html>
