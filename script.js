@@ -21,10 +21,14 @@ function loadMedia() {
         video.autoplay = true;
         video.loop = false;
         video.muted = true; // Remove mute if you want sound
-        video.addEventListener('loadedmetadata', () => {
+        video.controls = false;
+        video.style.display = 'block';
+
+        video.addEventListener('canplay', () => {
             video.play();
             setTimeout(loadMedia, currentMedia.duration * 1000);
         });
+
         mediaContainer.appendChild(video);
     }
 
