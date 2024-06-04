@@ -1,7 +1,7 @@
 ﻿const mediaContainer = document.getElementById('media-container');
 let mediaData = [];
 let currentIndex = 0;
-let nextVideoElement = null;
+let nextMediaTimeout;
 
 function loadMedia() {
     if (mediaData.length === 0) return;
@@ -13,34 +13,38 @@ function loadMedia() {
     if (currentMedia.type === 'image') {
         const img = document.createElement('img');
         img.src = currentMedia.path;
+        img.style.position = 'absolute';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
         mediaContainer.appendChild(img);
 
         preloadNextMedia(); // Preload the next media
 
-        setTimeout(() => {
-            showNextMedia();
-        }, (currentMedia.duration - 0.5) * 1000); // Show next media half a second before the end
+        nextMediaTimeout = setTimeout(() => {
+            loadMedia();
+        }, currentMedia.duration * 1000);
     } else if (currentMedia.type === 'video') {
-        if (nextVideoElement) {
-            mediaContainer.appendChild(nextVideoElement);
-            nextVideoElement = null;
-            setTimeout(loadMedia, currentMedia.duration * 1000);
-        } else {
-            const video = document.createElement('video');
-            video.src = currentMedia.path;
-            video.autoplay = true;
-            video.loop = false;
-            video.muted = true; // Remove mute if you want sound
-            video.controls = false;
-            video.style.display = 'block';
+        const video = document.createElement('video');
+        video.src = currentMedia.path;
+        video.autoplay = true;
+        video.loop = false;
+        video.muted = true; // Remove mute if you want sound
+        video.controls = false;
+        video.style.position = 'absolute';
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'contain';
 
-            video.addEventListener('canplay', () => {
-                video.play();
-                setTimeout(loadMedia, currentMedia.duration * 1000);
-            });
+        video.addEventListener('canplay', () => {
+            video.play();
+        });
 
-            mediaContainer.appendChild(video);
-        }
+        mediaContainer.appendChild(video);
+
+        nextMediaTimeout = setTimeout(() => {
+            loadMedia();
+        }, currentMedia.duration * 1000);
     }
 
     currentIndex = (currentIndex + 1) % mediaData.length;
@@ -51,55 +55,23 @@ function preloadNextMedia() {
     const nextMedia = mediaData[nextIndex];
 
     if (nextMedia.type === 'video') {
-        if (nextMedia.path.includes('youtube.com') || nextMedia.path.includes('youtu.be')) {
-            const videoId = extractYouTubeId(nextMedia.path);
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; encrypted-media';
-            iframe.allowFullscreen = true;
-            iframe.style.display = 'none'; // Hide initially
-            mediaContainer.appendChild(iframe);
+        const video = document.createElement('video');
+        video.src = nextMedia.path;
+        video.autoplay = false; // Do not autoplay yet
+        video.loop = false;
+        video.muted = true; // Remove mute if you want sound
+        video.controls = false;
+        video.style.position = 'absolute';
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'contain';
+        video.style.display = 'none'; // Hide initially
 
-            nextVideoElement = iframe;
-        } else if (nextMedia.path.includes('vimeo.com')) {
-            const videoId = extractVimeoId(nextMedia.path);
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1&title=0&byline=0&portrait=0`;
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; fullscreen';
-            iframe.allowFullscreen = true;
-            iframe.style.display = 'none'; // Hide initially
-            mediaContainer.appendChild(iframe);
+        video.addEventListener('canplay', () => {
+            video.style.display = 'block';
+        });
 
-            nextVideoElement = iframe;
-        } else {
-            const video = document.createElement('video');
-            video.src = nextMedia.path;
-            video.autoplay = false; // Do not autoplay yet
-            video.loop = false;
-            video.muted = true; // Remove mute if you want sound
-            video.controls = false;
-            video.style.display = 'none'; // Hide initially
-
-            nextVideoElement = video;
-        }
-    }
-}
-
-function showNextMedia() {
-    if (nextVideoElement) {
-        nextVideoElement.style.display = 'block';
-        nextVideoElement.autoplay = true;
-        nextVideoElement.muted = true;
-        nextVideoElement.play();
-        nextVideoElement = null;
-
-        setTimeout(loadMedia, mediaData[currentIndex].duration * 1000);
+        mediaContainer.appendChild(video);
     }
 }
 
