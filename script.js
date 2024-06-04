@@ -8,18 +8,21 @@ let currentIndex = 0;
 let sequentialCounts = {};
 let intercalatedCounts = {};
 
-// Function to generate a unique identifier
-function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+// Function to generate a shorter unique identifier
+function generateShortUUID() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let uuid = '';
+    for (let i = 0; i < 8; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        uuid += chars[randomIndex];
+    }
+    return uuid;
 }
 
 // Get or set device identifier in local storage
 let deviceIdentifier = localStorage.getItem('deviceIdentifier');
 if (!deviceIdentifier) {
-    deviceIdentifier = generateUUID();
+    deviceIdentifier = generateShortUUID();
     localStorage.setItem('deviceIdentifier', deviceIdentifier);
 }
 deviceNameElement.textContent = deviceIdentifier;
