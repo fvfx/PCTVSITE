@@ -24,6 +24,7 @@ function loadMedia() {
         if (nextVideoElement) {
             mediaContainer.appendChild(nextVideoElement);
             nextVideoElement = null;
+            setTimeout(loadMedia, currentMedia.duration * 1000);
         } else {
             const video = document.createElement('video');
             video.src = currentMedia.path;
@@ -59,6 +60,9 @@ function preloadNextMedia() {
             iframe.frameBorder = '0';
             iframe.allow = 'autoplay; encrypted-media';
             iframe.allowFullscreen = true;
+            iframe.style.display = 'none'; // Hide initially
+            mediaContainer.appendChild(iframe);
+
             nextVideoElement = iframe;
         } else if (nextMedia.path.includes('vimeo.com')) {
             const videoId = extractVimeoId(nextMedia.path);
@@ -69,6 +73,9 @@ function preloadNextMedia() {
             iframe.frameBorder = '0';
             iframe.allow = 'autoplay; fullscreen';
             iframe.allowFullscreen = true;
+            iframe.style.display = 'none'; // Hide initially
+            mediaContainer.appendChild(iframe);
+
             nextVideoElement = iframe;
         } else {
             const video = document.createElement('video');
@@ -77,7 +84,7 @@ function preloadNextMedia() {
             video.loop = false;
             video.muted = true; // Remove mute if you want sound
             video.controls = false;
-            video.style.display = 'block';
+            video.style.display = 'none'; // Hide initially
 
             nextVideoElement = video;
         }
@@ -86,13 +93,12 @@ function preloadNextMedia() {
 
 function showNextMedia() {
     if (nextVideoElement) {
+        nextVideoElement.style.display = 'block';
         nextVideoElement.autoplay = true;
         nextVideoElement.muted = true;
-        nextVideoElement.style.display = 'block';
-        mediaContainer.innerHTML = '';
-        mediaContainer.appendChild(nextVideoElement);
         nextVideoElement.play();
         nextVideoElement = null;
+
         setTimeout(loadMedia, mediaData[currentIndex].duration * 1000);
     }
 }
@@ -124,4 +130,3 @@ function startSlideshow() {
 }
 
 fetchMediaData();
-
