@@ -98,9 +98,10 @@ function extractVimeoId(url) {
 }
 
 function organizeMediaData(data) {
-    normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item));
-    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item));
-    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item));
+    const now = new Date();
+    normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item, now));
+    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item, now));
+    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item, now));
     sequentialCounts = {};
     intercalatedCounts = {};
 
@@ -121,13 +122,29 @@ function organizeMediaData(data) {
     createPlaybackSequence();
 }
 
-function shouldDisplayItem(item) {
+function shouldDisplayItem(item, now) {
     const isExcluded = item.excludedTVs && item.excludedTVs.includes(deviceIdentifier);
     const isIncluded = item.includedTVs && item.includedTVs.includes(deviceIdentifier);
-    if (item.includedTVs && item.includedTVs.length > 0) {
-        return isIncluded;
+    const startDate = item.dataDeInicio ? new Date(item.dataDeInicio) : null;
+    const endDate = item.dataDeExclusao ? new Date(item.dataDeExclusao) : null;
+
+    if (item.includedTVs && item.includedTVs.length > 0 && !isIncluded) {
+        return false;
     }
-    return !isExcluded;
+
+    if (isExcluded) {
+        return false;
+    }
+
+    if (startDate && now < startDate) {
+        return false;
+    }
+
+    if (endDate && now > endDate) {
+        return false;
+    }
+
+    return true;
 }
 
 function createPlaybackSequence() {
@@ -180,4 +197,3 @@ function startSlideshow() {
 }
 
 fetchMediaData();
-
