@@ -19,7 +19,7 @@ function loadMedia() {
         if (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be')) {
             const videoId = extractYouTubeId(currentMedia.path);
             const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
             iframe.width = '100%';
             iframe.height = '100%';
             iframe.frameBorder = '0';
@@ -31,7 +31,7 @@ function loadMedia() {
         } else if (currentMedia.path.includes('vimeo.com')) {
             const videoId = extractVimeoId(currentMedia.path);
             const iframe = document.createElement('iframe');
-            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1`;
+            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1&title=0&byline=0&portrait=0`;
             iframe.width = '100%';
             iframe.height = '100%';
             iframe.frameBorder = '0';
