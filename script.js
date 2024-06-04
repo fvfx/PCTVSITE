@@ -2,8 +2,10 @@
 let mediaData = [];
 let normalMedia = [];
 let sequentialMedia = [];
+let intercalatedMedia = [];
 let currentIndex = 0;
 let sequentialCounts = {};
+let intercalatedCounts = {};
 
 function loadMedia() {
     if (mediaData.length === 0) return;
@@ -78,13 +80,22 @@ function extractVimeoId(url) {
 function organizeMediaData(data) {
     normalMedia = data.filter(item => item.categoria === 'Normal');
     sequentialMedia = data.filter(item => item.categoria === 'Sequencial');
+    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada');
     sequentialCounts = {};
+    intercalatedCounts = {};
 
     sequentialMedia.forEach(item => {
         if (!sequentialCounts[item.repeatCount]) {
             sequentialCounts[item.repeatCount] = [];
         }
         sequentialCounts[item.repeatCount].push(item);
+    });
+
+    intercalatedMedia.forEach(item => {
+        if (!intercalatedCounts[item.repeatCount]) {
+            intercalatedCounts[item.repeatCount] = [];
+        }
+        intercalatedCounts[item.repeatCount].push(item);
     });
 
     createPlaybackSequence();
@@ -94,6 +105,7 @@ function createPlaybackSequence() {
     mediaData = [];
     let normalIndex = 0;
     let sequentialIndex = {};
+    let intercalatedIndex = {};
 
     while (normalIndex < normalMedia.length) {
         mediaData.push(normalMedia[normalIndex]);
@@ -103,6 +115,19 @@ function createPlaybackSequence() {
             if ((normalIndex + 1) % count === 0) {
                 mediaData.push(...sequentialCounts[count]);
                 sequentialIndex[count]++;
+            }
+        });
+
+        Object.keys(intercalatedCounts).forEach(count => {
+            if (!intercalatedIndex[count]) intercalatedIndex[count] = 0;
+            if ((normalIndex + 1) % count === 0) {
+                const intercalatedItems = intercalatedCounts[count];
+                intercalatedItems.forEach((item, index) => {
+                    if ((intercalatedIndex[count] + index) % intercalatedItems.length === 0) {
+                        mediaData.push(item);
+                    }
+                });
+                intercalatedIndex[count]++;
             }
         });
 
@@ -126,4 +151,3 @@ function startSlideshow() {
 }
 
 fetchMediaData();
-
