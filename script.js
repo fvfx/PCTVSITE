@@ -1,6 +1,7 @@
 ﻿const mediaContainer = document.getElementById('media-container');
 let mediaData = [];
 let currentIndex = 0;
+let preloadedVideo = null;
 
 function loadMedia() {
     if (mediaData.length === 0) return;
@@ -14,51 +15,59 @@ function loadMedia() {
         img.src = currentMedia.path;
         mediaContainer.appendChild(img);
 
-        setTimeout(loadMedia, currentMedia.duration * 1000);
+        preloadNextMedia(); // Preload the next media
+
+        setTimeout(() => {
+            if (preloadedVideo) {
+                mediaContainer.innerHTML = '';
+                mediaContainer.appendChild(preloadedVideo);
+                preloadedVideo.play();
+                preloadedVideo = null;
+                setTimeout(loadMedia, currentMedia.duration * 1000 - 500); // Adjust the timing if necessary
+            } else {
+                loadMedia();
+            }
+        }, (currentMedia.duration - 0.5) * 1000);
     } else if (currentMedia.type === 'video') {
-        if (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be')) {
-            const videoId = extractYouTubeId(currentMedia.path);
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; encrypted-media';
-            iframe.allowFullscreen = true;
-            mediaContainer.appendChild(iframe);
+        const video = document.createElement('video');
+        video.src = currentMedia.path;
+        video.autoplay = true;
+        video.loop = false;
+        video.muted = true; // Remove mute if you want sound
+        video.controls = false;
+        video.style.display = 'block';
 
+        video.addEventListener('canplay', () => {
+            video.play();
             setTimeout(loadMedia, currentMedia.duration * 1000);
-        } else if (currentMedia.path.includes('vimeo.com')) {
-            const videoId = extractVimeoId(currentMedia.path);
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1&title=0&byline=0&portrait=0`;
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; fullscreen';
-            iframe.allowFullscreen = true;
-            mediaContainer.appendChild(iframe);
+        });
 
-            setTimeout(loadMedia, currentMedia.duration * 1000);
-        } else {
-            const video = document.createElement('video');
-            video.src = currentMedia.path;
-            video.autoplay = true;
-            video.loop = false;
-            video.muted = true; // Remove mute if you want sound
-            video.controls = false;
-            video.style.display = 'block';
-
-            video.addEventListener('canplay', () => {
-                video.play();
-                setTimeout(loadMedia, currentMedia.duration * 1000);
-            });
-
-            mediaContainer.appendChild(video);
-        }
+        mediaContainer.appendChild(video);
     }
 
     currentIndex = (currentIndex + 1) % mediaData.length;
+}
+
+function preloadNextMedia() {
+    const nextIndex = (currentIndex + 1) % mediaData.length;
+    const nextMedia = mediaData[nextIndex];
+
+    if (nextMedia.type === 'video') {
+        const video = document.createElement('video');
+        video.src = nextMedia.path;
+        video.autoplay = false;
+        video.loop = false;
+        video.muted = true; // Remove mute if you want sound
+        video.controls = false;
+        video.style.display = 'block';
+        video.style.visibility = 'hidden';
+
+        video.addEventListener('canplay', () => {
+            preloadedVideo = video;
+        });
+
+        mediaContainer.appendChild(video);
+    }
 }
 
 function extractYouTubeId(url) {
@@ -88,3 +97,4 @@ function startSlideshow() {
 }
 
 fetchMediaData();
+
