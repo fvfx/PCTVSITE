@@ -98,9 +98,9 @@ function extractVimeoId(url) {
 }
 
 function organizeMediaData(data) {
-    normalMedia = data.filter(item => item.categoria === 'Normal' && !item.excludedTVs.includes(deviceIdentifier));
-    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && !item.excludedTVs.includes(deviceIdentifier));
-    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && !item.excludedTVs.includes(deviceIdentifier));
+    normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item));
+    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item));
+    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item));
     sequentialCounts = {};
     intercalatedCounts = {};
 
@@ -119,6 +119,15 @@ function organizeMediaData(data) {
     });
 
     createPlaybackSequence();
+}
+
+function shouldDisplayItem(item) {
+    const isExcluded = item.excludedTVs && item.excludedTVs.includes(deviceIdentifier);
+    const isIncluded = item.includedTVs && item.includedTVs.includes(deviceIdentifier);
+    if (item.includedTVs && item.includedTVs.length > 0) {
+        return isIncluded;
+    }
+    return !isExcluded;
 }
 
 function createPlaybackSequence() {
@@ -171,3 +180,4 @@ function startSlideshow() {
 }
 
 fetchMediaData();
+
