@@ -1,7 +1,6 @@
 ﻿const mediaContainer = document.getElementById('media-container');
 let mediaData = [];
 let currentIndex = 0;
-let nextMediaTimeout;
 
 function loadMedia() {
     if (mediaData.length === 0) return;
@@ -13,66 +12,53 @@ function loadMedia() {
     if (currentMedia.type === 'image') {
         const img = document.createElement('img');
         img.src = currentMedia.path;
-        img.style.position = 'absolute';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
         mediaContainer.appendChild(img);
 
-        preloadNextMedia(); // Preload the next media
-
-        nextMediaTimeout = setTimeout(() => {
-            loadMedia();
-        }, currentMedia.duration * 1000);
+        setTimeout(loadMedia, currentMedia.duration * 1000);
     } else if (currentMedia.type === 'video') {
-        const video = document.createElement('video');
-        video.src = currentMedia.path;
-        video.autoplay = true;
-        video.loop = false;
-        video.muted = true; // Remove mute if you want sound
-        video.controls = false;
-        video.style.position = 'absolute';
-        video.style.width = '100%';
-        video.style.height = '100%';
-        video.style.objectFit = 'contain';
+        if (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be')) {
+            const videoId = extractYouTubeId(currentMedia.path);
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allow = 'autoplay; encrypted-media';
+            iframe.allowFullscreen = true;
+            mediaContainer.appendChild(iframe);
 
-        video.addEventListener('canplay', () => {
-            video.play();
-        });
+            setTimeout(loadMedia, currentMedia.duration * 1000);
+        } else if (currentMedia.path.includes('vimeo.com')) {
+            const videoId = extractVimeoId(currentMedia.path);
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://player.vimeo.com/video/${videoId}?autoplay=1&mute=1&title=0&byline=0&portrait=0`;
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allow = 'autoplay; fullscreen';
+            iframe.allowFullscreen = true;
+            mediaContainer.appendChild(iframe);
 
-        mediaContainer.appendChild(video);
+            setTimeout(loadMedia, currentMedia.duration * 1000);
+        } else {
+            const video = document.createElement('video');
+            video.src = currentMedia.path;
+            video.autoplay = true;
+            video.loop = false;
+            video.muted = true; // Remove mute if you want sound
+            video.controls = false;
+            video.style.display = 'block';
 
-        nextMediaTimeout = setTimeout(() => {
-            loadMedia();
-        }, currentMedia.duration * 1000);
+            video.addEventListener('canplay', () => {
+                video.play();
+                setTimeout(loadMedia, currentMedia.duration * 1000);
+            });
+
+            mediaContainer.appendChild(video);
+        }
     }
 
     currentIndex = (currentIndex + 1) % mediaData.length;
-}
-
-function preloadNextMedia() {
-    const nextIndex = (currentIndex + 1) % mediaData.length;
-    const nextMedia = mediaData[nextIndex];
-
-    if (nextMedia.type === 'video') {
-        const video = document.createElement('video');
-        video.src = nextMedia.path;
-        video.autoplay = false; // Do not autoplay yet
-        video.loop = false;
-        video.muted = true; // Remove mute if you want sound
-        video.controls = false;
-        video.style.position = 'absolute';
-        video.style.width = '100%';
-        video.style.height = '100%';
-        video.style.objectFit = 'contain';
-        video.style.display = 'none'; // Hide initially
-
-        video.addEventListener('canplay', () => {
-            video.style.display = 'block';
-        });
-
-        mediaContainer.appendChild(video);
-    }
 }
 
 function extractYouTubeId(url) {
