@@ -8,10 +8,21 @@ let currentIndex = 0;
 let sequentialCounts = {};
 let intercalatedCounts = {};
 
-// Get device name from URL parameter
-const urlParams = new URLSearchParams(window.location.search);
-const deviceName = urlParams.get('device') || 'Unknown Device';
-deviceNameElement.textContent = deviceName;
+// Function to generate a unique identifier
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+// Get or set device identifier in local storage
+let deviceIdentifier = localStorage.getItem('deviceIdentifier');
+if (!deviceIdentifier) {
+    deviceIdentifier = generateUUID();
+    localStorage.setItem('deviceIdentifier', deviceIdentifier);
+}
+deviceNameElement.textContent = deviceIdentifier;
 
 function loadMedia() {
     if (mediaData.length === 0) return;
@@ -84,9 +95,9 @@ function extractVimeoId(url) {
 }
 
 function organizeMediaData(data) {
-    normalMedia = data.filter(item => item.categoria === 'Normal' && !item.excludedTVs.includes(deviceName));
-    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && !item.excludedTVs.includes(deviceName));
-    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && !item.excludedTVs.includes(deviceName));
+    normalMedia = data.filter(item => item.categoria === 'Normal' && !item.excludedTVs.includes(deviceIdentifier));
+    sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && !item.excludedTVs.includes(deviceIdentifier));
+    intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && !item.excludedTVs.includes(deviceIdentifier));
     sequentialCounts = {};
     intercalatedCounts = {};
 
