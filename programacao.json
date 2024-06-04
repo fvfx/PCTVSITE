@@ -6,6 +6,7 @@
     "categoria": "Normal",
     "repeatCount": null,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -16,6 +17,7 @@
     "categoria": "Normal",
     "repeatCount": null,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -26,6 +28,7 @@
     "categoria": "Normal",
     "repeatCount": null,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -36,6 +39,7 @@
     "categoria": "Normal",
     "repeatCount": null,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -46,6 +50,7 @@
     "categoria": "Normal",
     "repeatCount": null,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -56,6 +61,7 @@
     "categoria": "Sequencial",
     "repeatCount": 1,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -66,6 +72,7 @@
     "categoria": "Sequencial",
     "repeatCount": 2,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -76,6 +83,7 @@
     "categoria": "Intercalada",
     "repeatCount": 1,
     "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   },
@@ -86,6 +94,18 @@
     "categoria": "Intercalada",
     "repeatCount": 1,
     "excludedTVs": [],
+    "includedTVs": [],
+    "dataDeExclusao": null,
+    "dataDeInicio": null
+  },
+  {
+    "path": "https://fvfx.github.io/vxtest/Caixa de Som Bluetooth Wireless Boom - Horizontal - 26566.mp4",
+    "type": "video",
+    "duration": 5,
+    "categoria": "Normal",
+    "repeatCount": null,
+    "excludedTVs": [],
+    "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
   }
