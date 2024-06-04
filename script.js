@@ -1,4 +1,4 @@
-﻿const mediaContainer = document.getElementById('media-container');
+const mediaContainer = document.getElementById('media-container');
 const deviceNameElement = document.getElementById('device-name');
 let mediaData = [];
 let normalMedia = [];
@@ -7,6 +7,7 @@ let intercalatedMedia = [];
 let currentIndex = 0;
 let sequentialCounts = {};
 let intercalatedCounts = {};
+let timeoutId;  // Variable to store timeout ID
 
 // Function to generate a shorter unique identifier
 function generateShortUUID() {
@@ -37,8 +38,6 @@ function loadMedia() {
         const img = document.createElement('img');
         img.src = currentMedia.path;
         mediaContainer.appendChild(img);
-
-        setTimeout(loadMedia, currentMedia.duration * 1000);
     } else if (currentMedia.type === 'video') {
         if (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be')) {
             const videoId = extractYouTubeId(currentMedia.path);
@@ -50,8 +49,6 @@ function loadMedia() {
             iframe.allow = 'autoplay; encrypted-media';
             iframe.allowFullscreen = true;
             mediaContainer.appendChild(iframe);
-
-            setTimeout(loadMedia, currentMedia.duration * 1000);
         } else if (currentMedia.path.includes('vimeo.com')) {
             const videoId = extractVimeoId(currentMedia.path);
             const iframe = document.createElement('iframe');
@@ -62,8 +59,6 @@ function loadMedia() {
             iframe.allow = 'autoplay; fullscreen';
             iframe.allowFullscreen = true;
             mediaContainer.appendChild(iframe);
-
-            setTimeout(loadMedia, currentMedia.duration * 1000);
         } else {
             const video = document.createElement('video');
             video.src = currentMedia.path;
@@ -75,12 +70,15 @@ function loadMedia() {
 
             video.addEventListener('canplay', () => {
                 video.play();
-                setTimeout(loadMedia, currentMedia.duration * 1000);
             });
 
             mediaContainer.appendChild(video);
         }
     }
+
+    // Clear previous timeout before setting a new one
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(loadMedia, currentMedia.duration * 1000);
 
     currentIndex = (currentIndex + 1) % mediaData.length;
 }
