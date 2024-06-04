@@ -196,4 +196,6 @@ function startSlideshow() {
     loadMedia();
 }
 
+// Fetch data initially and set up interval to refresh data every 30 seconds
 fetchMediaData();
+setInterval(fetchMediaData, 30000); // 30000 ms = 30 seconds
