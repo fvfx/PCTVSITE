@@ -64,7 +64,7 @@
     "type": "image",
     "duration": 5,
     "categoria": "Sequencial",
-    "repeatCount": 1,
+    "repeatCount": 2,
     "excludedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
