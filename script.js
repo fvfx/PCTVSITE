@@ -13,15 +13,21 @@ function loadMedia() {
         const img = document.createElement('img');
         img.src = currentMedia.path;
         mediaContainer.appendChild(img);
+
+        setTimeout(loadMedia, currentMedia.duration * 1000);
     } else if (currentMedia.type === 'video') {
         const video = document.createElement('video');
         video.src = currentMedia.path;
         video.autoplay = true;
-        video.loop = true;
+        video.loop = false;
+        video.muted = true; // Remove mute if you want sound
+        video.addEventListener('loadedmetadata', () => {
+            video.play();
+            setTimeout(loadMedia, currentMedia.duration * 1000);
+        });
         mediaContainer.appendChild(video);
     }
 
-    setTimeout(loadMedia, currentMedia.duration * 1000);
     currentIndex = (currentIndex + 1) % mediaData.length;
 }
 
