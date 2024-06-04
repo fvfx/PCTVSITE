@@ -8,6 +8,7 @@ let currentIndex = 0;
 let sequentialCounts = {};
 let intercalatedCounts = {};
 let timeoutId;  // Variable to store timeout ID
+let internetConnected = true; // Variable to track internet connection status
 
 // Function to generate a shorter unique identifier
 function generateShortUUID() {
@@ -39,6 +40,11 @@ function loadMedia() {
         img.src = currentMedia.path;
         mediaContainer.appendChild(img);
     } else if (currentMedia.type === 'video') {
+        if (!internetConnected && (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be') || currentMedia.path.includes('vimeo.com'))) {
+            // Skip the video if no internet connection
+            loadNextMedia();
+            return;
+        }
         if (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be')) {
             const videoId = extractYouTubeId(currentMedia.path);
             const iframe = document.createElement('iframe');
@@ -78,9 +84,14 @@ function loadMedia() {
 
     // Clear previous timeout before setting a new one
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(loadMedia, currentMedia.duration * 1000);
+    timeoutId = setTimeout(loadNextMedia, currentMedia.duration * 1000);
 
     currentIndex = (currentIndex + 1) % mediaData.length;
+}
+
+function loadNextMedia() {
+    currentIndex = (currentIndex + 1) % mediaData.length;
+    loadMedia();
 }
 
 function extractYouTubeId(url) {
@@ -186,8 +197,12 @@ function fetchMediaData() {
         .then(response => response.json())
         .then(data => {
             organizeMediaData(data);
+            internetConnected = true; // Reset internet connection status on successful fetch
         })
-        .catch(error => console.error('Error fetching media data:', error));
+        .catch(error => {
+            console.error('Error fetching media data:', error);
+            internetConnected = false; // Update internet connection status on fetch error
+        });
 }
 
 function startSlideshow() {
