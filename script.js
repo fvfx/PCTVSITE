@@ -7,10 +7,10 @@ let intercalatedMedia = [];
 let currentIndex = 0;
 let sequentialCounts = {};
 let intercalatedCounts = {};
-let timeoutId;  // Variable to store timeout ID
-let internetConnected = true; // Variable to track internet connection status
+let timeoutId;  // Variável para armazenar o ID do timeout
+let internetConnected = true; // Variável para rastrear o status da conexão com a internet
 
-// Function to generate a shorter unique identifier
+// Função para gerar um identificador único mais curto
 function generateShortUUID() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let uuid = '';
@@ -21,35 +21,38 @@ function generateShortUUID() {
     return uuid;
 }
 
-// Get or set device identifier in local storage
+// Obter ou definir o identificador do dispositivo no armazenamento local
 let deviceIdentifier = localStorage.getItem('deviceIdentifier');
 if (!deviceIdentifier) {
     deviceIdentifier = generateShortUUID();
     localStorage.setItem('deviceIdentifier', deviceIdentifier);
 }
 
-// Fetch geolocation data
+// Buscar dados de geolocalização
 function fetchGeolocation() {
-    fetch('https://ipinfo.io/json?token=fefcbc0ea76800') // Using your actual token
+    fetch('https://ipinfo.io/json?token=fefcbc0ea76800') // Usando seu token real
         .then(response => response.json())
         .then(data => {
             const location = `${data.city}, ${data.region}`;
-            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: ${location}`;
+            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Localização: ${location}`;
         })
         .catch(error => {
-            console.error('Error fetching geolocation data:', error);
-            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: Unknown`;
+            console.error('Erro ao buscar dados de geolocalização:', error);
+            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Localização: Desconhecida`;
         });
 }
 
-// Fetch geolocation data initially
+// Buscar dados de geolocalização inicialmente
 fetchGeolocation();
 
+/**
+ * Função para carregar o item de mídia atual
+ */
 function loadMedia() {
     if (mediaData.length === 0) return;
 
     const currentMedia = mediaData[currentIndex];
-    mediaContainer.innerHTML = ''; // Clear previous media
+    mediaContainer.innerHTML = ''; // Limpar mídia anterior
 
     if (currentMedia.type === 'image') {
         const img = document.createElement('img');
@@ -57,7 +60,7 @@ function loadMedia() {
         mediaContainer.appendChild(img);
     } else if (currentMedia.type === 'video') {
         if (!internetConnected && (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be') || currentMedia.path.includes('vimeo.com'))) {
-            // Skip the video if no internet connection
+            // Pular o vídeo se não houver conexão com a internet
             loadNextMedia();
             return;
         }
@@ -86,7 +89,7 @@ function loadMedia() {
             video.src = currentMedia.path;
             video.autoplay = true;
             video.loop = false;
-            video.muted = true; // Remove mute if you want sound
+            video.muted = true; // Remova o mute se quiser som
             video.controls = false;
             video.style.display = 'block';
 
@@ -98,30 +101,47 @@ function loadMedia() {
         }
     }
 
-    // Clear previous timeout before setting a new one
+    // Limpar timeout anterior antes de definir um novo
     clearTimeout(timeoutId);
     timeoutId = setTimeout(loadNextMedia, currentMedia.duration * 1000);
 
     currentIndex = (currentIndex + 1) % mediaData.length;
 }
 
+/**
+ * Função para carregar o próximo item de mídia
+ */
 function loadNextMedia() {
     currentIndex = (currentIndex + 1) % mediaData.length;
     loadMedia();
 }
 
+/**
+ * Função para extrair o ID do vídeo do YouTube a partir da URL
+ * @param {string} url - A URL do vídeo do YouTube
+ * @returns {string|null} - O ID do vídeo do YouTube
+ */
 function extractYouTubeId(url) {
     const regExp = /^.*(youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
     const match = url.match(regExp);
     return (match && match[2]) ? match[2] : null;
 }
 
+/**
+ * Função para extrair o ID do vídeo do Vimeo a partir da URL
+ * @param {string} url - A URL do vídeo do Vimeo
+ * @returns {string|null} - O ID do vídeo do Vimeo
+ */
 function extractVimeoId(url) {
     const regExp = /vimeo.com\/(\d+)/;
     const match = url.match(regExp);
     return (match && match[1]) ? match[1] : null;
 }
 
+/**
+ * Função para organizar dados de mídia em categorias
+ * @param {Array} data - O array de dados de mídia
+ */
 function organizeMediaData(data) {
     const now = new Date();
     normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item, now));
@@ -147,6 +167,12 @@ function organizeMediaData(data) {
     createPlaybackSequence();
 }
 
+/**
+ * Função para verificar se um item de mídia deve ser exibido
+ * @param {Object} item - O item de mídia
+ * @param {Date} now - A data atual
+ * @returns {boolean} - Verdadeiro se o item deve ser exibido, falso caso contrário
+ */
 function shouldDisplayItem(item, now) {
     const isExcluded = item.excludedTVs && item.excludedTVs.includes(deviceIdentifier);
     const isIncluded = item.includedTVs && item.includedTVs.includes(deviceIdentifier);
@@ -172,6 +198,9 @@ function shouldDisplayItem(item, now) {
     return true;
 }
 
+/**
+ * Função para criar a sequência de reprodução para itens de mídia
+ */
 function createPlaybackSequence() {
     mediaData = [];
     let normalIndex = 0;
@@ -208,23 +237,29 @@ function createPlaybackSequence() {
     startSlideshow();
 }
 
+/**
+ * Função para buscar dados de mídia a partir de um arquivo JSON
+ */
 function fetchMediaData() {
     fetch('programacao.json')
         .then(response => response.json())
         .then(data => {
             organizeMediaData(data);
-            internetConnected = true; // Reset internet connection status on successful fetch
+            internetConnected = true; // Redefinir status da conexão com a internet em caso de sucesso
         })
         .catch(error => {
-            console.error('Error fetching media data:', error);
-            internetConnected = false; // Update internet connection status on fetch error
+            console.error('Erro ao buscar dados de mídia:', error);
+            internetConnected = false; // Atualizar status da conexão com a internet em caso de erro
         });
 }
 
+/**
+ * Função para iniciar o slideshow
+ */
 function startSlideshow() {
     loadMedia();
 }
 
-// Fetch data initially and set up interval to refresh data every 30 seconds
+// Buscar dados inicialmente e configurar intervalo para atualizar dados a cada 30 segundos
 fetchMediaData();
-setInterval(fetchMediaData, 30000); // 30000 ms = 30 seconds
+setInterval(fetchMediaData, 30000); // 30000 ms = 30 segundos

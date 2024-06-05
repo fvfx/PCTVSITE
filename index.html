@@ -11,9 +11,9 @@
     <div id="device-info" style="position: fixed; bottom: 0; left: 0; color: white; background-color: black; padding: 5px;"></div>
     <script src="script.js"></script>
     <script>
-        // Hide cursor after a period of inactivity
+        // Esconder o cursor das SmartTVs e Mouse/Desktop
         let cursorTimeout;
-        const hideCursorDelay = 3000; // 3 seconds of inactivity
+        const hideCursorDelay = 3000; // 3 segundos de inatividade (analisar se aumento o tempo)
 
         function hideCursor() {
             document.body.style.cursor = 'none';
@@ -30,7 +30,8 @@
         document.addEventListener('keydown', resetCursorTimer);
         document.addEventListener('touchstart', resetCursorTimer);
 
-        resetCursorTimer(); // Initial call to set the timeout
+        resetCursorTimer(); // Chamada inicial para configurar o timeout
     </script>
 </body>
 </html>
+
