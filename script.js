@@ -1,5 +1,5 @@
 const mediaContainer = document.getElementById('media-container');
-const deviceNameElement = document.getElementById('device-name');
+const deviceInfoElement = document.getElementById('device-info');
 let mediaData = [];
 let normalMedia = [];
 let sequentialMedia = [];
@@ -27,7 +27,23 @@ if (!deviceIdentifier) {
     deviceIdentifier = generateShortUUID();
     localStorage.setItem('deviceIdentifier', deviceIdentifier);
 }
-deviceNameElement.textContent = deviceIdentifier;
+
+// Fetch geolocation data
+function fetchGeolocation() {
+    fetch('https://ipinfo.io/json?token=fefcbc0ea76800') // Using your actual token
+        .then(response => response.json())
+        .then(data => {
+            const location = `${data.city}, ${data.region}`;
+            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: ${location}`;
+        })
+        .catch(error => {
+            console.error('Error fetching geolocation data:', error);
+            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: Unknown`;
+        });
+}
+
+// Fetch geolocation data initially
+fetchGeolocation();
 
 function loadMedia() {
     if (mediaData.length === 0) return;
