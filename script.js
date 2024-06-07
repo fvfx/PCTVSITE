@@ -9,6 +9,7 @@ let sequentialCounts = {};
 let intercalatedCounts = {};
 let timeoutId;  // Variable to store timeout ID
 let internetConnected = true; // Variable to track internet connection status
+let deviceLocation = ''; // Variable to store the device location
 
 // Function to generate a shorter unique identifier
 function generateShortUUID() {
@@ -33,11 +34,13 @@ function fetchGeolocation() {
     fetch('https://ipinfo.io/json?token=fefcbc0ea76800') // Using your actual token
         .then(response => response.json())
         .then(data => {
-            const location = `${data.city}, ${data.region}`;
-            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: ${location}`;
+            const location = `${data.region}`;
+            deviceLocation = data.region;
+            deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: ${data.city}, ${data.region}`;
         })
         .catch(error => {
             console.error('Error fetching geolocation data:', error);
+            deviceLocation = 'Unknown';
             deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: Unknown`;
         });
 }
@@ -148,8 +151,8 @@ function organizeMediaData(data) {
 }
 
 function shouldDisplayItem(item, now) {
-    const isExcluded = item.excludedTVs && item.excludedTVs.includes(deviceIdentifier);
-    const isIncluded = item.includedTVs && item.includedTVs.includes(deviceIdentifier);
+    const isExcluded = item.excludedTVs && (item.excludedTVs.includes(deviceIdentifier) || item.excludedTVs.includes(deviceLocation));
+    const isIncluded = item.includedTVs && (item.includedTVs.includes(deviceIdentifier) || item.includedTVs.includes(deviceLocation));
     const startDate = item.dataDeInicio ? new Date(item.dataDeInicio) : null;
     const endDate = item.dataDeExclusao ? new Date(item.dataDeExclusao) : null;
 
