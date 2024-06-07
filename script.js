@@ -183,17 +183,17 @@ function createPlaybackSequence() {
     mediaData = [];
     let normalIndex = 0;
 
+    // Add all sequential items first
+    Object.keys(sequentialCounts).forEach(count => {
+        for (let i = 0; i < sequentialCounts[count].length; i++) {
+            mediaData.push(sequentialCounts[count][i]);
+        }
+    });
+
+    // Add normal items interleaved with intercalated items
     while (normalIndex < normalMedia.length) {
         mediaData.push(normalMedia[normalIndex]);
 
-        // Process sequential media first
-        Object.keys(sequentialCounts).forEach(count => {
-            if ((normalIndex + 1) % count === 0) {
-                mediaData.push(...sequentialCounts[count]);
-            }
-        });
-
-        // Process intercalated media after sequential media
         Object.keys(intercalatedCounts).forEach(count => {
             if ((normalIndex + 1) % count === 0) {
                 const intercalatedItems = intercalatedCounts[count];
