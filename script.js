@@ -37,11 +37,13 @@ function fetchGeolocation() {
             const location = `${data.region}`;
             deviceLocation = data.region;
             deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: ${data.city}, ${data.region}`;
+            fetchMediaData(); // Fetch media data after obtaining location
         })
         .catch(error => {
             console.error('Error fetching geolocation data:', error);
             deviceLocation = 'Unknown';
             deviceInfoElement.textContent = `ID: ${deviceIdentifier}, Location: Unknown`;
+            fetchMediaData(); // Fetch media data even if location fetch fails
         });
 }
 
@@ -178,30 +180,24 @@ function shouldDisplayItem(item, now) {
 function createPlaybackSequence() {
     mediaData = [];
     let normalIndex = 0;
-    let sequentialIndex = {};
-    let intercalatedIndex = {};
 
     while (normalIndex < normalMedia.length) {
         mediaData.push(normalMedia[normalIndex]);
 
         // Process sequential media first
         Object.keys(sequentialCounts).forEach(count => {
-            if (!sequentialIndex[count]) sequentialIndex[count] = 0;
             if ((normalIndex + 1) % count === 0) {
                 mediaData.push(...sequentialCounts[count]);
-                sequentialIndex[count]++;
             }
         });
 
         // Process intercalated media after sequential media
         Object.keys(intercalatedCounts).forEach(count => {
-            if (!intercalatedIndex[count]) intercalatedIndex[count] = 0;
             if ((normalIndex + 1) % count === 0) {
                 const intercalatedItems = intercalatedCounts[count];
                 intercalatedItems.forEach((item, index) => {
                     mediaData.push(item);
                 });
-                intercalatedIndex[count]++;
             }
         });
 
@@ -229,5 +225,4 @@ function startSlideshow() {
 }
 
 // Fetch data initially and set up interval to refresh data every 30 seconds
-fetchMediaData();
 setInterval(fetchMediaData, 30000); // 30000 ms = 30 seconds
