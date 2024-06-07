@@ -56,9 +56,11 @@ function loadMedia() {
     const currentMedia = mediaData[currentIndex];
     mediaContainer.innerHTML = ''; // Clear previous media
 
+    let mediaPath = `${currentMedia.path}?timestamp=${new Date().getTime()}`; // Add a unique parameter to the URL
+
     if (currentMedia.type === 'image') {
         const img = document.createElement('img');
-        img.src = currentMedia.path;
+        img.src = mediaPath;
         mediaContainer.appendChild(img);
     } else if (currentMedia.type === 'video') {
         if (!internetConnected && (currentMedia.path.includes('youtube.com') || currentMedia.path.includes('youtu.be') || currentMedia.path.includes('vimeo.com'))) {
@@ -88,7 +90,7 @@ function loadMedia() {
             mediaContainer.appendChild(iframe);
         } else {
             const video = document.createElement('video');
-            video.src = currentMedia.path;
+            video.src = mediaPath;
             video.autoplay = true;
             video.loop = false;
             video.muted = true; // Remove mute if you want sound
