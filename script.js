@@ -142,6 +142,10 @@ function shouldDisplayItem(item, now) {
         return false;
     }
 
+    if (item.excludedTVs && item.excludedTVs.includes(deviceIdentifier)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -155,8 +159,10 @@ function createPlaybackSequence() {
         // Process sequential media first
         Object.keys(sequentialCounts).forEach(count => {
             if ((normalIndex + 1) % count === 0) {
-                sequentialCounts[count].forEach(item => {
-                    mediaData.push(item);
+                sequentialCounts[count].forEach((item, index) => {
+                    if ((normalIndex + 1) % (index + 1) === 0) {
+                        mediaData.push(item);
+                    }
                 });
             }
         });
@@ -164,8 +170,10 @@ function createPlaybackSequence() {
         // Process intercalated media after sequential media
         Object.keys(intercalatedCounts).forEach(count => {
             if ((normalIndex + 1) % count === 0) {
-                intercalatedCounts[count].forEach(item => {
-                    mediaData.push(item);
+                intercalatedCounts[count].forEach((item, index) => {
+                    if ((normalIndex + 1) % (index + 1) === 0) {
+                        mediaData.push(item);
+                    }
                 });
             }
         });
