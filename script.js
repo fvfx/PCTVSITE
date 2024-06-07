@@ -196,9 +196,7 @@ function createPlaybackSequence() {
             if ((normalIndex + 1) % count === 0) {
                 const intercalatedItems = intercalatedCounts[count];
                 intercalatedItems.forEach((item, index) => {
-                    if ((intercalatedIndex[count] + index) % intercalatedItems.length === 0) {
-                        mediaData.push(item);
-                    }
+                    mediaData.push(item);
                 });
                 intercalatedIndex[count]++;
             }
