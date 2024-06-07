@@ -5,7 +5,7 @@
     "duration": 5,
     "categoria": "Normal",
     "repeatCount": null,
-    "excludedTVs": ["BA", "SP"],
+    "excludedTVs": ["3694f0d0-2369-4f70-a91c-b19c230a2a37,", "SP"],
     "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
