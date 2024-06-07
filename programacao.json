@@ -5,11 +5,11 @@
     "duration": 5,
     "categoria": "Normal",
     "repeatCount": null,
-    "excludedTVs": ["BA", "SP"],  // Exclui a exibição na Bahia e em São Paulo
+    "excludedTVs": ["BA", "SP"],
     "includedTVs": [],
     "dataDeExclusao": null,
     "dataDeInicio": null
-},
+  },
   {
     "path": "https://fvfx.github.io/vxtest/Capa Kevlar - horizontal - 26930.jpg",
     "type": "image",
