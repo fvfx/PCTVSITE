@@ -1,14 +1,11 @@
 const mediaContainer = document.getElementById('media-container');
-const deviceInfoElement = document.getElementById('device-info');
 let mediaData = [];
 let normalMedia = [];
 let sequentialMedia = [];
 let intercalatedMedia = [];
 let currentIndex = 0;
-let sequentialCounts = {};
-let intercalatedCounts = {};
-let timeoutId;  // Variable to store timeout ID
-let internetConnected = true; // Variable to track internet connection status
+let timeoutId;
+let internetConnected = true;
 
 // Function to generate a shorter unique identifier
 function generateShortUUID() {
@@ -110,22 +107,6 @@ function organizeMediaData(data) {
     normalMedia = data.filter(item => item.categoria === 'Normal' && shouldDisplayItem(item, now));
     sequentialMedia = data.filter(item => item.categoria === 'Sequencial' && shouldDisplayItem(item, now) && item.repeatCount && item.repeatCount > 0);
     intercalatedMedia = data.filter(item => item.categoria === 'Intercalada' && shouldDisplayItem(item, now) && item.repeatCount && item.repeatCount > 0);
-    sequentialCounts = {};
-    intercalatedCounts = {};
-
-    sequentialMedia.forEach(item => {
-        if (!sequentialCounts[item.repeatCount]) {
-            sequentialCounts[item.repeatCount] = [];
-        }
-        sequentialCounts[item.repeatCount].push(item);
-    });
-
-    intercalatedMedia.forEach(item => {
-        if (!intercalatedCounts[item.repeatCount]) {
-            intercalatedCounts[item.repeatCount] = [];
-        }
-        intercalatedCounts[item.repeatCount].push(item);
-    });
 
     createPlaybackSequence();
 }
@@ -152,33 +133,45 @@ function shouldDisplayItem(item, now) {
 function createPlaybackSequence() {
     mediaData = [];
     let normalIndex = 0;
+    let sequentialIndex = 0;
+    let intercalatedIndex = 0;
+    let sequentialRepeatCounts = {};
+    let intercalatedRepeatCounts = {};
 
-    while (normalIndex < normalMedia.length) {
-        mediaData.push(normalMedia[normalIndex]);
+    while (normalIndex < normalMedia.length || sequentialIndex < sequentialMedia.length || intercalatedIndex < intercalatedMedia.length) {
+        // Add normal media
+        if (normalIndex < normalMedia.length) {
+            mediaData.push(normalMedia[normalIndex]);
+            normalIndex++;
+        }
 
-        // Process sequential media first
-        Object.keys(sequentialCounts).forEach(count => {
-            if ((normalIndex + 1) % count === 0) {
-                sequentialCounts[count].forEach((item, index) => {
-                    if ((normalIndex + 1) % (index + 1) === 0) {
-                        mediaData.push(item);
-                    }
-                });
+        // Add sequential media based on repeatCount
+        for (let count in sequentialMedia) {
+            if (!sequentialRepeatCounts[count]) {
+                sequentialRepeatCounts[count] = 0;
             }
-        });
-
-        // Process intercalated media after sequential media
-        Object.keys(intercalatedCounts).forEach(count => {
-            if ((normalIndex + 1) % count === 0) {
-                intercalatedCounts[count].forEach((item, index) => {
-                    if ((normalIndex + 1) % (index + 1) === 0) {
-                        mediaData.push(item);
-                    }
-                });
+            if ((normalIndex + sequentialRepeatCounts[count]) % count === 0) {
+                if (sequentialIndex < sequentialMedia.length) {
+                    mediaData.push(sequentialMedia[sequentialIndex]);
+                    sequentialIndex++;
+                }
+                sequentialRepeatCounts[count]++;
             }
-        });
+        }
 
-        normalIndex++;
+        // Add intercalated media based on repeatCount
+        for (let count in intercalatedMedia) {
+            if (!intercalatedRepeatCounts[count]) {
+                intercalatedRepeatCounts[count] = 0;
+            }
+            if ((normalIndex + intercalatedRepeatCounts[count]) % count === 0) {
+                if (intercalatedIndex < intercalatedMedia.length) {
+                    mediaData.push(intercalatedMedia[intercalatedIndex]);
+                    intercalatedIndex++;
+                }
+                intercalatedRepeatCounts[count]++;
+            }
+        }
     }
 
     startSlideshow();
